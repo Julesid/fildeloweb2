@@ -17,7 +17,7 @@ const UtilisateurPromo = sequelize.define('UtilisateurPromotion', {
   },
   has_access: {
     type: DataTypes.BOOLEAN,
-    defaultValue: true,
+    defaultValue: true, 
   }
 }, {
   timestamps: false, // Si tu n'utilises pas les timestamps

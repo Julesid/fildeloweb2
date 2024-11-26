@@ -5,7 +5,9 @@ const { Sequelize } = require('sequelize');
 // Configuration de la base de données
 const sequelize = new Sequelize('202425_fildelo_jcheminat', 'root', '', {
   host: 'localhost',
-  dialect: 'mysql', 
+  dialect: 'mysql',
 });
 
+// Export de l'instance Sequelize
 module.exports = sequelize;
+

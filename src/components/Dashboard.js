@@ -12,7 +12,7 @@ function Dashboard() {
     const sessionToken = Cookies.get("sessionToken");
     if (!sessionToken) {
       // Redirige vers la page de connexion si le token n'existe pas
-      navigate("/");
+      navigate("/dashboard");
     } else {
       // Vérifie la validité du token avec le backend
       const fetchDashboardData = async () => {
@@ -26,7 +26,7 @@ function Dashboard() {
             "Erreur lors de la récupération des données du Dashboard :",
             error
           );
-          navigate("/"); // Redirige si le token est invalide
+          navigate("/dashboard"); // Redirige si le token est invalide
         }
       };
 

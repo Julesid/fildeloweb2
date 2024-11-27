@@ -3,6 +3,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const Promotion = require('./Promotion'); // Assure-toi que le modèle est importé
+//const Utilisateur = require('./Utilisateur');
 
 const UtilisateurPromo = sequelize.define('UtilisateurPromotion', {
   utilisateur_id: {
@@ -23,6 +24,7 @@ const UtilisateurPromo = sequelize.define('UtilisateurPromotion', {
   timestamps: false, // Si tu n'utilises pas les timestamps
 });
 
-UtilisateurPromo.belongsTo(Promotion, { foreignKey: 'promotion_id' });
+//UtilisateurPromo.belongsTo(Promotion, { foreignKey: 'promotion_id' });
+//UtilisateurPromo.belongsTo(Utilisateur, { foreignKey: 'utilisateur_id' });
 
 module.exports = UtilisateurPromo;

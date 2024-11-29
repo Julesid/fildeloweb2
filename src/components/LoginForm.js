@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
-
 const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -43,19 +42,16 @@ const LoginForm = () => {
           const response = await axios.get(
             `http://localhost:5001/api/auth/promotion/${selectedUtilisateur}`
           );
-          setPromotions(response.data); // Assigne les promotions récupérées
+          setPromotions(response.data);
         } catch (error) {
-          console.error(
-            "Erreur lors de la récupération des promotions :",
-            error
-          );
-          setPromotions([]); // Vide les promotions en cas d'erreur
+          console.error("Erreur lors de la récupération des promotions :", error);
+          setPromotions([]);
         }
       };
 
       fetchPromotionsByUser();
     } else {
-      setPromotions([]); // Réinitialise les promotions si aucun utilisateur n'est sélectionné
+      setPromotions([]);
     }
   }, [selectedUtilisateur]);
 
@@ -73,8 +69,11 @@ const LoginForm = () => {
       );
 
       if (response.data.success) {
-        // Stocke le token ou identifiant de session dans un cookie
-        Cookies.set("sessionToken", response.data.sessionToken, { expires: 1 });
+        const { sessionToken, username, epreuve, promotion } = response.data;
+        Cookies.set("sessionToken", sessionToken, { expires: 1 });
+        Cookies.set("username", username, { expires: 1 });
+        Cookies.set("epreuve", epreuve, { expires: 1 });
+        Cookies.set("promotion", promotion, { expires: 1 });
         navigate("/dashboard");
       } else {
         setMessage(response.data.message);
@@ -90,7 +89,6 @@ const LoginForm = () => {
     <div className="bg-white/70 backdrop-blur-md p-8 rounded-lg shadow-lg w-80">
       <h2 className="text-2xl font-bold mb-4 text-center">Connexion</h2>
       <form onSubmit={handleLogin}>
-        {/* Champ pour choisir l'épreuve */}
         <div className="mb-4">
           <label className="block mb-2 text-gray-700">Épreuve</label>
           <select
@@ -109,8 +107,6 @@ const LoginForm = () => {
             ))}
           </select>
         </div>
-
-        {/* Champ pour choisir l'utilisateur */}
         <div className="mb-4">
           <label className="block mb-2 text-gray-700">Nom d'utilisateur</label>
           <select
@@ -131,8 +127,6 @@ const LoginForm = () => {
             )}
           </select>
         </div>
-
-        {/* Champ pour entrer le mot de passe */}
         <div className="mb-4">
           <label className="block mb-2 text-gray-700">Mot de passe</label>
           <input
@@ -143,8 +137,6 @@ const LoginForm = () => {
             required
           />
         </div>
-
-        {/* Champ pour choisir une promotion */}
         <div className="mb-4">
           <label className="block mb-2 text-gray-700">Promotion</label>
           <select
@@ -156,29 +148,16 @@ const LoginForm = () => {
             <option value="" disabled>
               Choisir
             </option>
-            {promotions
-              .filter(
-                (promotion) =>
-                  promotion.UtilisateurPromotions &&
-                  promotion.UtilisateurPromotions.length > 0 &&
-                  promotion.UtilisateurPromotions[0].has_access
-              )
-              .map((promotion) => (
-                <option key={promotion.id} value={`${promotion.annee}`}>
-                  {`${promotion.annee.slice(0, 4)} - ${promotion.annee.slice(
-                    4
-                  )}`}
-                </option>
-              ))}
+            {promotions.map((promotion) => (
+              <option key={promotion.id} value={`${promotion.annee}`}>
+                {`${promotion.annee.slice(0, 4)} - ${promotion.annee.slice(4)}`}
+              </option>
+            ))}
           </select>
         </div>
-
-        {/* Bouton de connexion */}
         <button type="submit" className="btn btn-primary w-full">
           Se connecter
         </button>
-
-        {/* Affichage des messages d'erreur */}
         {message && <p className="mt-4 text-red-500 text-center">{message}</p>}
       </form>
     </div>

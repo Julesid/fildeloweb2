@@ -3,7 +3,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Activite = sequelize.define('Activite', {
+const Activites = sequelize.define('Activites', {
   libelle: {
     type: DataTypes.STRING(175), // Taille maximale définie dans la base
     allowNull: false,
@@ -18,4 +18,4 @@ const Activite = sequelize.define('Activite', {
   },
 });
 
-module.exports = Activite;
+module.exports = Activites;

@@ -37,11 +37,9 @@ app.get('/', (req, res) => {
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
-// Ajout de la route du Dashboard protégée par authentification
-const authenticate = require('./middleware/auth');
-app.get('/api/dashboard', authenticate, (req, res) => {
-  res.json({ message: 'Bienvenue sur le Dashboard protégé !' });
-});
+// Importer les routes du dashboard
+const dashboardRoutes = require('./routes/dashboard');
+app.use('/api/dashboard', dashboardRoutes);
 
 // Démarrer le serveur
 app.listen(PORT, () => {

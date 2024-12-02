@@ -44,7 +44,10 @@ const LoginForm = () => {
           );
           setPromotions(response.data);
         } catch (error) {
-          console.error("Erreur lors de la récupération des promotions :", error);
+          console.error(
+            "Erreur lors de la récupération des promotions :",
+            error
+          );
           setPromotions([]);
         }
       };
@@ -69,11 +72,17 @@ const LoginForm = () => {
       );
 
       if (response.data.success) {
-        const { sessionToken, username, epreuve, promotion } = response.data;
+        const { sessionToken, user, exam, promo } = response.data;
+
+        Cookies.set("username", selectedUtilisateur, { expires: 2 });
+        Cookies.set("epreuve", selectedEpreuve, { expires: 2 });
+        Cookies.set("promotion", selectedPromotion, { expires: 2 });
         Cookies.set("sessionToken", sessionToken, { expires: 1 });
-        Cookies.set("username", username, { expires: 1 });
-        Cookies.set("epreuve", epreuve, { expires: 1 });
-        Cookies.set("promotion", promotion, { expires: 1 });
+
+        console.log("Utilisateur :", user);
+        console.log("Épreuve :", exam);
+        console.log("Promotion :", promo);
+
         navigate("/dashboard");
       } else {
         setMessage(response.data.message);

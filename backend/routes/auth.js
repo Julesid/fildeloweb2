@@ -24,7 +24,7 @@ router.post("/login", async (req, res) => {
       // Si l'utilisateur n'est pas trouvé, renvoie une erreur
       return res
         .status(401)
-        .json({ message: "Nom d'utilisateur ou mot de passe incorrect." });
+        .json({ message: "Nom d'utilisateur incorrect." });
     }
 
     // Vérifie le mot de passe haché avec bcrypt

@@ -5,10 +5,26 @@ const Activite = require('../models/Activite');
 const Cookies = require('cookies'); // Assurez-vous d'avoir installé ce package : npm install cookies
 
 
+// Middleware pour la gestion des sessions
+const session = require("express-session");
+router.use(
+  session({ secret: "hfgkqjdhfgkjsdgfkjdfgqskjfgkjfhgsdqkjfg", resave: false, saveUninitialized: true })
+);
 
-router.get("/api/dashboard", (req, res) => {
+router.use((req, res, next) => {
+  console.log("Session actuelle dashboard.js :", req.session);
+  next();
+});
+
+
+router.get("/", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  if (!token || !isValidToken(token)) {
+
+  // Vérifie que le token existe et correspond à celui stocké dans la session
+  console.log("token session : ", req.session.token);
+  console.log("username session : ", req.session.username);
+  console.log("tocken recup : ", token);
+  if (!token || req.session.token !== token) {
     return res.status(401).json({ message: "Accès non autorisé" });
   }
 
@@ -16,10 +32,6 @@ router.get("/api/dashboard", (req, res) => {
   res.json({ message: "Données du Dashboard" });
 });
 
-function isValidToken(token) {
-  // Vérification du token (par exemple, en utilisant une session stockée en backend)
-  return token === "valid-session-token";
-}
 
 router.get("/activite", async (req, res) => {
   try {
@@ -55,22 +67,23 @@ router.get("/activite", async (req, res) => {
 router.post("/activitepost", async (req, res) => {
   try {
     const cookies = new Cookies(req, res);
-    const username = cookies.get("username"); // Récupérer la valeur du cookie
+    console.log("Cookies présents :", cookies.get("username")); // Debugging
+    const username = cookies.get("username");
 
-    const { libelle, commentaire } = req.body;
-
-    if (!libelle) {
-      return res.status(400).json({ error: "Le champ 'libelle' est requis." });
-    }
-
+    //console.log(username);
     if (!username) {
       return res.status(400).json({ error: "Utilisateur non authentifié." });
+    }
+
+    const { libelle, commentaire } = req.body;
+    if (!libelle) {
+      return res.status(400).json({ error: "Le champ 'libelle' est requis." });
     }
 
     const newActivite = await Activite.create({
       libelle,
       commentaire,
-      created_by: username, // Associe l'utilisateur au champ created_by
+      created_by: username,
     });
 
     res.status(201).json(newActivite);
@@ -79,6 +92,7 @@ router.post("/activitepost", async (req, res) => {
     res.status(500).json({ error: "Erreur lors de l'ajout de l'activité." });
   }
 });
+
 
 
 module.exports = router;

@@ -42,7 +42,7 @@ function Dashboard() {
         setMessage(response.data.message);
       } catch (error) {
         console.error("Erreur lors de la récupération des données :", error);
-        navigate("/dashboard");
+        navigate("/dashboard"); //TODO : mettre a / une fois que ça marche ma poule
       }
     };
 

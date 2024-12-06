@@ -2,27 +2,49 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const MemoryStore = require("memorystore")(session);
+const SequelizeStore = require("connect-session-sequelize")(session.Store);
 const sequelize = require('./config/database');
+
+// Importation des modèles
+const Epreuve = require('./models/Epreuve');
+const Promotion = require('./models/Promotion');
+const Utilisateur = require('./models/Utilisateur');
+const UtilisateurPromo = require('./models/UtilisateurPromo');
+const Activite = require('./models/Activite');
 
 const app = express();
 const PORT = 5001;
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:3000', credentials: true })); // Autorise le frontend à se connecter
 app.use(bodyParser.json());
 
-// Middleware de session
-app.use(session({
-  secret: 'ton_secret', // Mets ici un secret fort et sécurisé
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Mets `true` si tu utilises HTTPS
-}));
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+});
 
-// Test de connexion à la base de données
-sequelize.authenticate()
-  .then(() => {
+// Middleware de session
+app.use(
+  session({
+    secret: "hfgkqjdhfgkjsdgfkjdfgqskjfgkjfhgsdqkjfg", // Changez cela pour une valeur plus sécurisée
+    resave: false,
+    saveUninitialized: true,
+    store: sessionStore,
+    cookie: { secure: false, httpOnly: true },
+  })
+);
+sessionStore.sync();
+
+// Synchronisation des modèles avec la base de données
+sequelize
+  .authenticate()
+  .then(async () => {
     console.log('Connexion à la base de données réussie.');
+
+    // Synchronisation des modèles
+    await sequelize.sync();
+    console.log('Les modèles sont synchronisés avec la base de données.');
   })
   .catch((err) => {
     console.error('Impossible de se connecter à la base de données :', err);
@@ -30,7 +52,7 @@ sequelize.authenticate()
 
 // Routes
 app.get('/', (req, res) => {
-  res.send('Bienvenue sur l\'API du backend !');
+  res.send("Bienvenue sur l'API du backend !");
 });
 
 // Importer les routes d'authentification

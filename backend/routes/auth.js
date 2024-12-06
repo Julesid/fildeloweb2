@@ -1,4 +1,5 @@
 const express = require("express");
+const crypto = require("crypto");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const Epreuve = require("../models/Epreuve");
@@ -9,43 +10,67 @@ const UtilisateurPromo = require("../models/UtilisateurPromo");
 // Middleware pour la gestion des sessions
 const session = require("express-session");
 router.use(
-  session({ secret: "ton_secret", resave: false, saveUninitialized: true })
+  session({ secret: "hfgkqjdhfgkjsdgfkjdfgqskjfgkjfhgsdqkjfg", resave: false, saveUninitialized: true })
 );
+router.use((req, res, next) => {
+  console.log("Session actuelle auth.js :", req.session);
+  next();
+});
 
-// Route de connexion
+
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Récupère l'utilisateur en utilisant la clé primaire (ici, le nom d'utilisateur)
     const utilisateur = await Utilisateur.findByPk(username);
 
     if (!utilisateur) {
-      // Si l'utilisateur n'est pas trouvé, renvoie une erreur
-      return res
-        .status(401)
-        .json({ message: "Nom d'utilisateur incorrect." });
+      return res.status(401).json({
+        success: false,
+        message: "Nom d'utilisateur incorrect.",
+      });
     }
 
-    // Vérifie le mot de passe haché avec bcrypt
     const isPasswordValid = await bcrypt.compare(
       password,
       utilisateur.mdp_bcrypt
     );
 
-    if (isPasswordValid) {
-      // Enregistre l'authentification dans la session
-      req.session.isAuthenticated = true;
-      return res.json({ message: "Connexion réussie !", success: true });
-    } else {
-      // Mot de passe incorrect
-      return res
-        .status(401)
-        .json({ message: "Nom d'utilisateur ou mot de passe incorrect." });
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Mot de passe incorrect.",
+      });
     }
+
+    // Génération et stockage du token
+    const sessionToken = crypto.randomBytes(16).toString("hex");
+    req.session.token = sessionToken; // Stocke le token dans la session
+    req.session.username = utilisateur.nom; // Stocke également le nom de l'utilisateur
+
+    // Sauvegarde explicite de la session pour s'assurer qu'elle est enregistrée
+    req.session.save((err) => {
+      if (err) {
+        console.error("Erreur lors de la sauvegarde de la session :", err);
+        return res
+          .status(500)
+          .json({ success: false, message: "Erreur du serveur." });
+      }
+
+      // Réponse avec le token et les informations utilisateur
+      res.json({
+        success: true,
+        message: "Connexion réussie !",
+        sessionToken,
+        user: utilisateur.nom,
+      });
+    });
   } catch (error) {
     console.error("Erreur lors de la connexion :", error);
-    return res.status(500).json({ message: "Erreur du serveur." });
+    res.status(500).json({
+      success: false,
+      message: "Erreur du serveur.",
+    });
   }
 });
 
@@ -171,6 +196,5 @@ router.get("/promotion/:utilisateur_id", async (req, res) => {
     res.status(500).json({ message: "Erreur du serveur." });
   }
 });
-
 
 module.exports = router;

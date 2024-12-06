@@ -60,36 +60,50 @@ const LoginForm = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
+      // Envoie une requête POST pour la connexion
       const response = await axios.post(
         "http://localhost:5001/api/auth/login",
         {
           username: selectedUtilisateur,
           password,
-          epreuve: selectedEpreuve,
-          promotion: selectedPromotion,
         }
       );
 
-      if (response.data.success) {
-        const { sessionToken, user, exam, promo } = response.data;
+      console.log("Réponse du serveur :", response.data);
 
-        Cookies.set("username", selectedUtilisateur, { expires: 2 });
-        Cookies.set("epreuve", selectedEpreuve, { expires: 2 });
-        Cookies.set("promotion", selectedPromotion, { expires: 2 });
+      // Vérifie si la connexion a réussi
+      if (response.data.success) {
+        const { sessionToken, user } = response.data;
+
+        // Stocke les informations utilisateur et le token dans des cookies
+        Cookies.set("username", user, { expires: 1 });
+        Cookies.set("usernameId", selectedUtilisateur, { expires: 1 });
+        Cookies.set("epreuve", selectedEpreuve, { expires: 1 });
+        Cookies.set("promotion", selectedPromotion, { expires: 1 });
         Cookies.set("sessionToken", sessionToken, { expires: 1 });
 
+        console.log("SessionToken :", sessionToken);
+        console.log("usernameId :", selectedUtilisateur);
         console.log("Utilisateur :", user);
-        console.log("Épreuve :", exam);
-        console.log("Promotion :", promo);
+        console.log("Épreuve :", selectedEpreuve);
+        console.log("Promotion :", selectedPromotion);
 
+        // Redirige vers le tableau de bord après la connexion
         navigate("/dashboard");
       } else {
-        setMessage(response.data.message);
+        // Affiche le message d'erreur renvoyé par le serveur
+        setMessage(response.data.message || "Une erreur est survenue.");
       }
     } catch (error) {
+      console.error("Erreur lors de la tentative de connexion :", error);
+
+      // Gère les erreurs et affiche un message approprié
       setMessage(
-        error.response ? error.response.data.message : "Erreur de connexion"
+        error.response
+          ? error.response.data.message
+          : "Impossible de se connecter au serveur."
       );
     }
   };

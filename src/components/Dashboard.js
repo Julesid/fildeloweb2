@@ -16,9 +16,6 @@ function Dashboard() {
   const [alertClosing, setAlertClosing] = useState(false);
   const [activeTab, setActiveTab] = useState("activite");
 
-  message = "f";
-  username="d";
-  console.log(message, username);
 
   useEffect(() => {
     const sessionToken = Cookies.get("sessionToken");
@@ -78,7 +75,6 @@ function Dashboard() {
     <div>
       <div className="navbar bg-primary text-primary-content">
         <div className="flex-1">
-        // eslint-disable-next-line jsx-a11y/anchor-is-valid
           <a className="btn btn-ghost text-xl">Fildelo</a>
         </div>
         <div className="flex-none gap-2">
@@ -97,11 +93,11 @@ function Dashboard() {
             </div>
             <ul className="menu menu-sm dropdown-content bg-base-100 rounded-box mt-3 w-52 p-2 shadow">
               <li>
-              // eslint-disable-next-line jsx-a11y/anchor-is-valid
+    
                 <a>Mot de passe</a>
               </li>
               <li>
-              // eslint-disable-next-line jsx-a11y/anchor-is-valid
+    
                 <a>Déconnexion</a>
               </li>
             </ul>
@@ -140,7 +136,6 @@ function Dashboard() {
       {/* Barre de navigation */}
       <ul className="menu bg-base-200 lg:menu-horizontal rounded-box fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
         <li>
-        // eslint-disable-next-line jsx-a11y/anchor-is-valid
           <a
             className={`flex items-center ${
               activeTab === "activite" ? "bg-gray-300" : ""
@@ -165,7 +160,6 @@ function Dashboard() {
           </a>
         </li>
         <li>
-        // eslint-disable-next-line jsx-a11y/anchor-is-valid
           <a
             className={`flex items-center ${
               activeTab === "evaluation" ? "bg-gray-300" : ""
@@ -190,7 +184,6 @@ function Dashboard() {
           </a>
         </li>
         <li>
-        // eslint-disable-next-line jsx-a11y/anchor-is-valid
           <a
             className={`flex items-center ${
               activeTab === "synthese" ? "bg-gray-300" : ""

@@ -16,6 +16,10 @@ function Dashboard() {
   const [alertClosing, setAlertClosing] = useState(false);
   const [activeTab, setActiveTab] = useState("activite");
 
+  message = "f";
+  username="d";
+  console.log(message, username);
+
   useEffect(() => {
     const sessionToken = Cookies.get("sessionToken");
     if (!sessionToken) {

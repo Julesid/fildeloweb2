@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
     console.log("Token reçu : ", token);
 
     if (!token || req.session.token !== token) {
-      console.log("Token invalide ou absent :", token);
+      //console.log("Token invalide ou absent :", token);
       return res.status(401).json({ message: "Accès non autorisé" });
     }
 

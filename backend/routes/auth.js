@@ -10,13 +10,12 @@ const UtilisateurPromo = require("../models/UtilisateurPromo");
 // Middleware pour la gestion des sessions
 const session = require("express-session");
 router.use(
-  session({ secret: "hfgkqjdhfgkjsdgfkjdfgqskjfgkjfhgsdqkjfg", resave: false, saveUninitialized: true })
+  session({ secret: "hfgkqjdhfgkjsdgfkjdfgqskjfgkjfhgsdqkjfg", resave: false, saveUninitialized: false })
 );
-router.use((req, res, next) => {
+/* router.use((req, res, next) => {
   console.log("Session actuelle auth.js :", req.session);
   next();
-});
-
+});  */
 
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -45,26 +44,35 @@ router.post("/login", async (req, res) => {
 
     // Génération et stockage du token
     const sessionToken = crypto.randomBytes(16).toString("hex");
-    req.session.token = sessionToken; // Stocke le token dans la session
-    req.session.username = utilisateur.nom; // Stocke également le nom de l'utilisateur
 
-    // Sauvegarde explicite de la session pour s'assurer qu'elle est enregistrée
-    req.session.save((err) => {
-      if (err) {
-        console.error("Erreur lors de la sauvegarde de la session :", err);
-        return res
-          .status(500)
-          .json({ success: false, message: "Erreur du serveur." });
-      }
+    if (sessionToken) {
+      //console.log("Monnnnnnnnnn Token de session : ", sessionToken);
+      req.session.token = sessionToken; // Stocke le token dans la session
+      req.session.username = utilisateur.nom; // Stocke également le nom de l'utilisateur
+      console.log("Session actuelle auth.js :", req.session);
+      // Sauvegarde explicite de la session
+      req.session.save((err) => {
+        if (err) {
+          console.error("Erreur lors de la sauvegarde de la session :", err);
+          return res
+            .status(500)
+            .json({ success: false, message: "Erreur du serveur." });
+        }
 
-      // Réponse avec le token et les informations utilisateur
-      res.json({
-        success: true,
-        message: "Connexion réussie !",
-        sessionToken,
-        user: utilisateur.nom,
+        // Réponse avec le token et les informations utilisateur
+        res.json({
+          success: true,
+          message: "Connexion réussie !",
+          sessionToken,
+          user: utilisateur.nom,
+        });
       });
-    });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Erreur lors de la génération du token.",
+      });
+    }
   } catch (error) {
     console.error("Erreur lors de la connexion :", error);
     res.status(500).json({
@@ -73,6 +81,7 @@ router.post("/login", async (req, res) => {
     });
   }
 });
+
 
 // Route pour déconnexion
 router.post("/logout", (req, res) => {

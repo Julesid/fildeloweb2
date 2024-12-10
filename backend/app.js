@@ -1,69 +1,89 @@
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const session = require('express-session');
-const MemoryStore = require("memorystore")(session);
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const session = require("express-session");
+const MemoryStore = require("memorystore")(session); // Alternative pour le stockage en mémoire
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
-const sequelize = require('./config/database');
+const sequelize = require("./config/database");
 
 // Importation des modèles
-const Epreuve = require('./models/Epreuve');
-const Promotion = require('./models/Promotion');
-const Utilisateur = require('./models/Utilisateur');
-const UtilisateurPromo = require('./models/UtilisateurPromo');
-const Activite = require('./models/Activite');
+const Epreuve = require("./models/Epreuve");
+const Promotion = require("./models/Promotion");
+const Utilisateur = require("./models/Utilisateur");
+const UtilisateurPromo = require("./models/UtilisateurPromo");
+const Activite = require("./models/Activite");
 
 const app = express();
 const PORT = 5001;
 
-// Middleware
-app.use(cors({ origin: 'http://localhost:3000', credentials: true })); // Autorise le frontend à se connecter
+// --- Middleware ---
+
+// CORS : Autoriser les requêtes provenant du frontend
+app.use(
+  cors({
+    origin: "http://localhost:3000", // URL de ton frontend
+    credentials: true, // Permet d'envoyer les cookies et headers d'authentification
+  })
+);
+
+// Body Parser : Permet de traiter les requêtes JSON
 app.use(bodyParser.json());
 
+// Configuration de stockage de session avec Sequelize
 const sessionStore = new SequelizeStore({
   db: sequelize,
 });
 
-// Middleware de session
+// Configuration globale de la session
 app.use(
   session({
-    secret: "hfgkqjdhfgkjsdgfkjdfgqskjfgkjfhgsdqkjfg", // Changez cela pour une valeur plus sécurisée
+    secret: "hfgkqjdhfgkjsdgfkjdfgqskjfgkjfhgsdqkjfg",
     resave: false,
-    saveUninitialized: true,
-    store: sessionStore,
-    cookie: { secure: false, httpOnly: true },
+    saveUninitialized: false,
+    store: sessionStore, // Utilise Sequelize pour stocker les sessions
+    cookie: {
+      maxAge: 30 * 60 * 1000, // Durée de vie des cookies : 30 minutes
+      httpOnly: true, // Améliore la sécurité en empêchant l'accès aux cookies côté client
+      secure: false, // Passe à "true" si HTTPS est utilisé
+    },
   })
 );
+
+// Synchronisation du store de sessions
 sessionStore.sync();
 
-// Synchronisation des modèles avec la base de données
+// --- Base de données ---
+
 sequelize
   .authenticate()
   .then(async () => {
-    console.log('Connexion à la base de données réussie.');
+    console.log("Connexion à la base de données réussie.");
 
-    // Synchronisation des modèles
+    // Synchronisation des modèles avec la base de données
     await sequelize.sync();
-    console.log('Les modèles sont synchronisés avec la base de données.');
+    console.log("Les modèles sont synchronisés avec la base de données.");
   })
   .catch((err) => {
-    console.error('Impossible de se connecter à la base de données :', err);
+    console.error("Impossible de se connecter à la base de données :", err);
   });
 
-// Routes
-app.get('/', (req, res) => {
+// --- Routes de l'API ---
+
+// Route de base pour vérifier le fonctionnement de l'API
+app.get("/", (req, res) => {
   res.send("Bienvenue sur l'API du backend !");
 });
 
-// Importer les routes d'authentification
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
+// Routes d'authentification
+const authRoutes = require("./routes/auth");
+app.use("/api/auth", authRoutes);
 
-// Importer les routes du dashboard
-const dashboardRoutes = require('./routes/dashboard');
-app.use('/api/dashboard', dashboardRoutes);
+// Routes du dashboard
+const dashboardRoutes = require("./routes/dashboard");
+app.use("/api/dashboard", dashboardRoutes);
 
-// Démarrer le serveur
+// --- Lancement du serveur ---
+
 app.listen(PORT, () => {
   console.log(`Serveur backend en cours d'exécution sur le port ${PORT}`);
 });

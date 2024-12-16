@@ -63,7 +63,7 @@ router.get("/activite", async (req, res) => {
 router.post("/activitepost", async (req, res) => {
   try {
     const cookies = new Cookies(req, res);
-    const username = cookies.get("username"); // Récupération de l'utilisateur via les cookies
+    const username = cookies.get("usernameId"); // Récupération de l'utilisateur via les cookies
 
     if (!username) {
       console.log("Utilisateur non authentifié : cookie absent.");

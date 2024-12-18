@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const Cookies = require("cookies"); // Assurez-vous d'avoir installé ce package : npm install cookies
+const Cookies = require("cookies");
 const Activite = require("../models/Activite");
+const Utilisateur = require("../models/Utilisateur");
 const session = require("express-session");
 
 // Middleware de session
@@ -23,14 +24,13 @@ router.use(
 // Route : Accès au Dashboard
 router.get("/", async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1]; // Récupération du token depuis l'en-tête Authorization
+    const token = req.headers.authorization?.split(" ")[1];
 
     console.log("Token session : ", req.session.token);
     console.log("Session actuelle dashboard.js :", req.session);
     console.log("Token reçu : ", token);
 
     if (!token || req.session.token !== token) {
-      //console.log("Token invalide ou absent :", token);
       return res.status(401).json({ message: "Accès non autorisé" });
     }
 
@@ -63,7 +63,7 @@ router.get("/activite", async (req, res) => {
 router.post("/activitepost", async (req, res) => {
   try {
     const cookies = new Cookies(req, res);
-    const username = cookies.get("usernameId"); // Récupération de l'utilisateur via les cookies
+    const username = cookies.get("usernameId");
 
     if (!username) {
       console.log("Utilisateur non authentifié : cookie absent.");
@@ -87,6 +87,96 @@ router.post("/activitepost", async (req, res) => {
   } catch (error) {
     console.error("Erreur lors de l'ajout de l'activité :", error);
     res.status(500).json({ error: "Erreur lors de l'ajout de l'activité." });
+  }
+});
+
+// Route : Suppression d'une activité
+router.delete("/activite/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const activite = await Activite.findByPk(id);
+
+    if (!activite) {
+      return res.status(404).json({ message: "Activité non trouvée." });
+    }
+
+    await activite.destroy();
+    console.log("Activité supprimée :", id);
+    res.status(200).json({ message: "Activité supprimée avec succès." });
+  } catch (error) {
+    console.error("Erreur lors de la suppression de l'activité :", error);
+    res.status(500).json({ error: "Erreur lors de la suppression." });
+  }
+});
+
+// Route : Modification d'une activité
+router.put("/activite/:id", async (req, res) => {
+  const { id } = req.params;
+  const { libelle, commentaire } = req.body;
+
+  try {
+    // Recherche l'activité par son ID
+    const activite = await Activite.findByPk(id);
+
+    if (!activite) {
+      return res.status(404).json({ message: "Activité non trouvée." });
+    }
+
+    // Met à jour les champs
+    activite.libelle = libelle;
+    activite.commentaire = commentaire;
+
+    // Sauvegarde les modifications
+    await activite.save();
+
+    res.status(200).json(activite);
+  } catch (error) {
+    console.error("Erreur lors de la modification de l'activité :", error);
+    res.status(500).json({ error: "Erreur lors de la modification." });
+  }
+});
+
+const bcrypt = require("bcrypt");
+
+// Route pour modifier le mot de passe
+router.put("/password", async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token || req.session.token !== token) {
+    return res.status(401).json({ message: "Accès non autorisé" });
+  }
+
+  try {
+    const username = req.session.username; // Utilisateur actuel depuis la session
+    const utilisateur = await Utilisateur.findOne({ where: { nom: username } });
+
+    if (!utilisateur) {
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
+    }
+
+    const isOldPasswordValid = await bcrypt.compare(
+      oldPassword,
+      utilisateur.mdp_bcrypt
+    );
+
+    if (!isOldPasswordValid) {
+      return res
+        .status(400)
+        .json({ message: "Mot de passe actuel incorrect." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    utilisateur.mdp_bcrypt = hashedPassword;
+    await utilisateur.save();
+
+    res.status(200).json({ message: "Mot de passe mis à jour avec succès." });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du mot de passe :", error);
+    res.status(500).json({ message: "Erreur serveur." });
   }
 });
 

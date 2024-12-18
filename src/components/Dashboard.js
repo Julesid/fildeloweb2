@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Activite from "./dashboardComponents/Activite";
 import Synthese from "./dashboardComponents/Synthese";
 import Evaluation from "./dashboardComponents/Evaluation";
+import axios from "axios";
 
 function Dashboard() {
   const navigate = useNavigate();
-  // eslint-disable-next-line
-  const [message, setMessage] = useState("");
-  // eslint-disable-next-line
-  const [username, setUsername] = useState("");
   const [epreuve, setEpreuve] = useState("");
   const [promotion, setPromotion] = useState("");
   const [showAlert, setShowAlert] = useState(true);
   const [alertClosing, setAlertClosing] = useState(false);
   const [activeTab, setActiveTab] = useState("activite");
-
+  const [isModalOpen, setIsModalOpen] = useState(false); // État pour ouvrir/fermer le modal
 
   useEffect(() => {
     const sessionToken = Cookies.get("sessionToken");
@@ -26,31 +22,11 @@ function Dashboard() {
       return;
     }
 
-    const usernameCookie = Cookies.get("username");
     const epreuveCookie = Cookies.get("epreuve");
     const promotionCookie = Cookies.get("promotion");
 
-    setUsername(usernameCookie);
     setEpreuve(epreuveCookie);
     setPromotion(promotionCookie);
-
-    const fetchDashboardData = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5001/api/dashboard",
-          {
-            headers: { Authorization: `Bearer ${sessionToken}` },
-            credentials: true,
-          }
-        );
-        setMessage(response.data.message);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des données :", error);
-        navigate("/dashboard"); //TODO : mettre a / une fois que ça marche ma poule
-      }
-    };
-
-    fetchDashboardData();
 
     const alertTimeout = setTimeout(() => {
       setAlertClosing(true);
@@ -60,7 +36,6 @@ function Dashboard() {
     return () => clearTimeout(alertTimeout);
   }, [navigate]);
 
-  // Choix du composant à afficher en fonction de l'onglet actif
   const renderTabContent = () => {
     switch (activeTab) {
       case "activite":
@@ -72,6 +47,17 @@ function Dashboard() {
       default:
         return null;
     }
+  };
+
+  const handleLogout = () => {
+    // Supprime les cookies
+    Cookies.remove("sessionToken");
+    Cookies.remove("username");
+    Cookies.remove("epreuve");
+    Cookies.remove("promotion");
+
+    // Redirige vers la page de connexion
+    navigate("/");
   };
 
   return (
@@ -96,24 +82,28 @@ function Dashboard() {
             </div>
             <ul className="menu menu-sm dropdown-content bg-base-100 rounded-box mt-3 w-52 p-2 shadow">
               <li>
-    
-                <a>Mot de passe</a>
+                <button onClick={() => setIsModalOpen(true)}>
+                  Mot de passe
+                </button>
               </li>
               <li>
-    
-                <a>Déconnexion</a>
+                <button onClick={handleLogout}>Déconnexion</button>
               </li>
             </ul>
           </div>
         </div>
       </div>
+
       {/* Contenu dynamique */}
       <div>{renderTabContent()}</div>
+
       {showAlert && (
         <div
           role="alert"
           className={`alert alert-info fixed bottom-4 right-4 w-80 shadow-lg rounded-lg p-4 flex items-center transform transition-transform duration-500 ${
-            alertClosing ? "translate-x-full opacity-0" : "translate-x-0 opacity-100"
+            alertClosing
+              ? "translate-x-full opacity-0"
+              : "translate-x-0 opacity-100"
           }`}
         >
           <svg
@@ -131,7 +121,9 @@ function Dashboard() {
           </svg>
           <span className="ml-2 text-sm">
             Connecté pour l'épreuve <strong>{epreuve}</strong> / promo{" "}
-            <strong>{promotion && `${promotion.slice(0, 4)} - ${promotion.slice(4)}`}</strong>
+            <strong>
+              {promotion && `${promotion.slice(0, 4)} - ${promotion.slice(4)}`}
+            </strong>
           </span>
         </div>
       )}
@@ -211,6 +203,114 @@ function Dashboard() {
           </a>
         </li>
       </ul>
+
+      {/* Modal DaisyUI */}
+      {isModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">Modifier le mot de passe</h3>
+            <form
+              className="space-y-4"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const oldPassword = e.target.elements.oldPassword.value;
+                const newPassword = e.target.elements.newPassword.value;
+                const confirmPassword = e.target.elements.confirmPassword.value;
+
+                if (newPassword !== confirmPassword) {
+                  alert("Les mots de passe ne correspondent pas.");
+                  return;
+                }
+
+                try {
+                  const response = await axios.put(
+                    "http://localhost:5001/api/dashboard/password",
+                    {
+                      oldPassword,
+                      newPassword,
+                    },
+                    {
+                      headers: {
+                        Authorization: `Bearer ${Cookies.get("sessionToken")}`,
+                      },
+                    }
+                  );
+
+                  if (response.status === 200) {
+                    alert("Mot de passe mis à jour avec succès.");
+                    setIsModalOpen(false);
+                  } else {
+                    alert(
+                      response.data.message || "Une erreur s'est produite."
+                    );
+                  }
+                } catch (error) {
+                  console.error("Erreur lors de la mise à jour :", error);
+                  alert(error.response?.data?.message || "Erreur serveur.");
+                }
+              }}
+            >
+              <div>
+                <label
+                  htmlFor="oldPassword"
+                  className="block text-sm font-medium text-gray-600"
+                >
+                  Mot de passe actuel
+                </label>
+                <input
+                  id="oldPassword"
+                  name="oldPassword"
+                  type="password"
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="newPassword"
+                  className="block text-sm font-medium text-gray-600"
+                >
+                  Nouveau mot de passe
+                </label>
+                <input
+                  id="newPassword"
+                  name="newPassword"
+                  type="password"
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-600"
+                >
+                  Confirmer le mot de passe
+                </label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  required
+                />
+              </div>
+              <div className="modal-action">
+                <button type="submit" className="btn btn-primary">
+                  Enregistrer
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

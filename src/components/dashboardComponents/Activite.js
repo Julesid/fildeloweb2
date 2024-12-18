@@ -6,6 +6,8 @@ function Activite() {
     libelle: "",
     commentaire: "",
   });
+  const [editActivite, setEditActivite] = useState(null); // Stocke l'activité à modifier
+  const [showModal, setShowModal] = useState(false); // Gère l'affichage du modal
 
   // Utilise useEffect pour récupérer les données de l'API
   useEffect(() => {
@@ -31,14 +33,30 @@ function Activite() {
     fetchActivites();
   }, []);
 
-  const handleEdit = (id) => {
-    console.log("Modifier l'activité avec l'ID :", id);
-    // Logique pour modifier l'activité
+  const handleEdit = (activite) => {
+    setEditActivite(activite); // Définit l'activité à modifier
+    setShowModal(true); // Affiche le modal
   };
 
-  const handleDelete = (id) => {
-    console.log("Supprimer l'activité avec l'ID :", id);
-    // Logique pour supprimer l'activité
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5001/api/dashboard/activite/${id}`,
+        { method: "DELETE" }
+      );
+
+      if (response.ok) {
+        console.log("Activité supprimée avec succès !");
+        setActivites(activites.filter((activite) => activite.id !== id));
+      } else {
+        console.error(
+          "Erreur lors de la suppression de l'activité :",
+          response.status
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors de la suppression de l'activité :", error);
+    }
   };
 
   // Gestion de l'ajout d'une nouvelle activité
@@ -51,7 +69,6 @@ function Activite() {
           method: "post",
           headers: {
             "Content-Type": "application/json",
-            "Cookie": "connect.sid=s%3AnPSnWjN45MN6h3QYXMxn4pOuTAZX-AfV.pEiT8b1D%2FSsOBDObFqhtaP6CbpyM3Wf71u8vrKxoPdA; username=1",
           },
           body: JSON.stringify(newActivite),
           credentials: "include", // Inclut les cookies dans la requête
@@ -70,6 +87,39 @@ function Activite() {
       }
     } catch (error) {
       console.error("Erreur lors de l'ajout de l'activité :", error);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5001/api/dashboard/activite/${editActivite.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(editActivite),
+        }
+      );
+
+      if (response.ok) {
+        const updatedActivite = await response.json();
+        setActivites((prev) =>
+          prev.map((activite) =>
+            activite.id === updatedActivite.id ? updatedActivite : activite
+          )
+        );
+        setShowModal(false); // Ferme le modal
+        setEditActivite(null); // Réinitialise l'état
+      } else {
+        console.error(
+          "Erreur lors de la mise à jour de l'activité :",
+          response.status
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de l'activité :", error);
     }
   };
 
@@ -151,7 +201,7 @@ function Activite() {
                 </div>
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => handleEdit(activite.id)}
+                    onClick={() => handleEdit(activite)}
                     className="px-4 py-2 bg-orange-400 text-white text-sm font-medium rounded hover:bg-orange-500 transition"
                   >
                     Modifier
@@ -170,6 +220,59 @@ function Activite() {
           )}
         </ul>
       </div>
+
+      {/* Modal pour modification */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h3 className="text-lg font-bold mb-4">Modifier l'activité</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium">Libellé</label>
+                <input
+                  type="text"
+                  value={editActivite?.libelle || ""}
+                  onChange={(e) =>
+                    setEditActivite({
+                      ...editActivite,
+                      libelle: e.target.value,
+                    })
+                  }
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Commentaire</label>
+                <textarea
+                  value={editActivite?.commentaire || ""}
+                  onChange={(e) =>
+                    setEditActivite({
+                      ...editActivite,
+                      commentaire: e.target.value,
+                    })
+                  }
+                  className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  rows="3"
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded hover:bg-gray-400 transition"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

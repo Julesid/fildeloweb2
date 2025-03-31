@@ -3,6 +3,7 @@ const router = express.Router();
 const Cookies = require("cookies");
 const Activite = require("../models/Activite");
 const Utilisateur = require("../models/Utilisateur");
+const Etudiant = require("../models/Etudiant");
 const session = require("express-session");
 
 // Middleware de session
@@ -179,6 +180,41 @@ router.put("/password", async (req, res) => {
     res.status(500).json({ message: "Erreur serveur." });
   }
 });
+
+// Route : Récupération des étudiants
+router.get("/etudiants", async (req, res) => {
+  try {
+    const etudiants = await Etudiant.findAll();
+
+    if (etudiants.length > 0) {
+      return res.json(etudiants);
+    }
+
+    console.log("Aucun étudiant trouvé.");
+    res.json([]);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des étudiants :", error);
+    res.status(500).json({ error: "Erreur serveur." });
+  }
+});
+
+router.get("/etudiantsFromPromo/:id", async (req, res) => {
+  try {
+    const etudiants = await Etudiant.findAll();
+
+    if (etudiants.length > 0) {
+      return res.json(etudiants);
+    }
+
+    console.log("Aucun étudiant trouvé.");
+    res.json([]);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des étudiants :", error);
+    res.status(500).json({ error: "Erreur serveur." });
+  }
+});
+
+
 
 // Fonction utilitaire pour les activités par défaut
 function getDefaultActivites() {

@@ -1,11 +1,11 @@
 const { Sequelize } = require('sequelize');
+const config = require('./config');
 
-// Configuration de la base de données
-const sequelize = new Sequelize('202425_fildelo_jcheminat2', 'root', '', {
-  host: 'localhost',
-  dialect: 'mysql',
-  logging: false, // Désactive les logs SQL pour plus de lisibilité
+const sequelize = new Sequelize(config.DB_NAME, config.DB_USER, config.DB_PASSWORD, {
+  host: config.DB_HOST,
+  port: config.DB_PORT, 
+  dialect: config.DB_DIALECT,
+  logging: false,
 });
 
-// Export de l'instance Sequelize
 module.exports = sequelize;

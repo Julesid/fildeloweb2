@@ -1,5 +1,5 @@
 import React from 'react';
-
+import Spline from '@splinetool/react-spline';
 import LoginForm from './components/LoginForm';
 import Dashboard from './components/Dashboard';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Import des modules Router

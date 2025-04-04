@@ -1,22 +1,26 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-const Etudiant = sequelize.define("Etudiant", {
+const PointEvaluer = sequelize.define("PointEvaluer", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
-  nom: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  prenom: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  promo_id: {
+  id_activite: {
     type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  id_critere: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  libelle: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  created_by: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
   created_at: {
@@ -28,9 +32,8 @@ const Etudiant = sequelize.define("Etudiant", {
     defaultValue: DataTypes.NOW,
   },
 }, {
-  tableName: "Etudiants",
-  timestamps: false, // Désactive createdAt et updatedAt automatiques
+  tableName: "Point_evaluers", // Nom réel de ta table
+  timestamps: false, // Désactiver les timestamps automatiques si `created_at` et `last_update` sont gérés manuellement
 });
 
-
-module.exports = Etudiant;
+module.exports = PointEvaluer;

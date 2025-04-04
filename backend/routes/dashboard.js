@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Cookies = require("cookies");
+const sequelize = require("../config/database");
+const { QueryTypes } = require('sequelize');
 const Activite = require("../models/Activite");
+const PointEvaluer = require("../models/PointEvaluer.js");
 const Utilisateur = require("../models/Utilisateur");
 const Etudiant = require("../models/Etudiant");
 const session = require("express-session");
@@ -198,18 +201,40 @@ router.get("/etudiants", async (req, res) => {
   }
 });
 
-router.get("/etudiantsFromPromo/:id", async (req, res) => {
+router.get("/pointsEvaluer/:idActivite", async (req, res) => {
   try {
-    const etudiants = await Etudiant.findAll();
+    const points = await PointEvaluer.findAll({
+      where: { id_activite: req.params.idActivite },
+    });
 
-    if (etudiants.length > 0) {
-      return res.json(etudiants);
+    if (points.length > 0) {
+      return res.json(points);
     }
 
-    console.log("Aucun étudiant trouvé.");
-    res.json([]);
+    res.status(404).json({ message: "Aucun point trouvé pour cette activité." });
   } catch (error) {
-    console.error("Erreur lors de la récupération des étudiants :", error);
+    console.error("Erreur lors de la récupération des points évalués :", error);
+    res.status(500).json({ error: "Erreur serveur." });
+  }
+});
+
+
+router.get("/etudiantsFromPromo/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("ID de la promo :", id);
+    const [results] = await sequelize.query(
+      "SELECT * FROM Etudiants e inner JOIN Promotions p on p.id = e.promo_id WHERE p.annee = :id",
+      {
+        replacements: { id },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    console.log("Résultat SQL brut :", results);
+    res.json(results);
+  } catch (error) {
+    console.error("Erreur SQL :", error);
     res.status(500).json({ error: "Erreur serveur." });
   }
 });

@@ -16,8 +16,7 @@ export default function App() {
             element={
               <div className="relative w-full h-screen">
                 {/* Arrière-plan interactif de Spline */}
-                <Spline
-                  scene="https://prod.spline.design/MYVyuwkObMX1Ru-h/scene.splinecode"
+                <Spline scene="https://prod.spline.design/MYVyuwkObMX1Ru-h/scene.splinecode"
                   className="absolute inset-0 w-full h-full z-0"
                 />
 

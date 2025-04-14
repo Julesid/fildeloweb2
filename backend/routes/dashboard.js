@@ -239,6 +239,36 @@ router.get("/etudiantsFromPromo/:id", async (req, res) => {
   }
 });
 
+// Route : Ajout d'une nouvelle activité
+router.post("/activitepost/notation/:idetudiant/:idpointdeval/:note", async (req, res) => {
+  try {
+    const cookies = new Cookies(req, res);
+    const username = cookies.get("usernameId");
+
+    if (!username) {
+      console.log("Utilisateur non authentifié : cookie absent.");
+      return res.status(401).json({ error: "Utilisateur non authentifié." });
+    }
+
+    const { libelle, commentaire } = req.body;
+
+    if (!libelle) {
+      return res.status(400).json({ error: "Le champ 'libelle' est requis." });
+    }
+
+    const newActivite = await Activite.create({
+      libelle,
+      commentaire,
+      created_by: username,
+    });
+
+    console.log("Nouvelle activité ajoutée :", newActivite);
+    res.status(201).json(newActivite);
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de l'activité :", error);
+    res.status(500).json({ error: "Erreur lors de l'ajout de l'activité." });
+  }
+});
 
 
 // Fonction utilitaire pour les activités par défaut

@@ -110,7 +110,7 @@ const LoginForm = () => {
 
   return (
     <div className="bg-white/70 backdrop-blur-md p-8 rounded-lg shadow-lg w-80">
-      <h2 className="text-2xl font-bold mb-4 text-center">Connexion</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">BLABLA BLA</h2>
       <form onSubmit={handleLogin}>
         <div className="mb-4">
           <label className="block mb-2 text-gray-700">Épreuve</label>

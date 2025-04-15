@@ -63,13 +63,10 @@ const LoginForm = () => {
 
     try {
       // Envoie une requête POST pour la connexion
-      const response = await axios.post(
-        "/api/auth/login",
-        {
-          username: selectedUtilisateur,
-          password,
-        }
-      );
+      const response = await axios.post("/api/auth/login", {
+        username: selectedUtilisateur,
+        password,
+      });
 
       console.log("Réponse du serveur :", response.data);
 
@@ -150,7 +147,7 @@ const LoginForm = () => {
             )}
           </select>
         </div>
-        <div className="mb-4">
+        <div className="mb-4 relative">
           <label className="block mb-2 text-gray-700">Mot de passe</label>
           <input
             type="password"
@@ -159,7 +156,17 @@ const LoginForm = () => {
             className="input input-bordered w-full"
             required
           />
+          <div className="absolute right-2 top-2 group cursor-pointer">
+            <span className="text-lg text-gray-500">?</span>
+            <div className="absolute top-6 right-0 hidden group-hover:flex flex-col items-center text-xs text-gray-500 transform rotate-180">
+              <span>T</span>
+              <span>O</span>
+              <span>T</span>
+              <span>O</span>
+            </div>
+          </div>
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 text-gray-700">Promotion</label>
           <select

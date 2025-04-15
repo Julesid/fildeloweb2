@@ -42,3 +42,9 @@ jobs:
         run: |
             repo_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
             docker push ghcr.io/$repo_name:latest
+      - name : Appel-webhook
+        run: |
+          curl -X POST "${{ secrets.WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d '{ "status": "success", "image": "jcheminat-fildeloweb:latest" }'
+          

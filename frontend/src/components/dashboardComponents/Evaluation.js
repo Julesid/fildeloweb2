@@ -12,7 +12,7 @@ function Evaluation() {
     const fetchActivites = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5001/api/dashboard/activite"
+          "/api/dashboard/activite"
         );
         if (response.ok) {
           const data = await response.json();
@@ -37,7 +37,7 @@ function Evaluation() {
           const promotionValue = Cookies.get("promotion");
           console.log("Promotion Value:", promotionValue);
           const response = await fetch(
-            `http://localhost:5001/api/dashboard/etudiantsFromPromo/${promotionValue}`
+            `/api/dashboard/etudiantsFromPromo/${promotionValue}`
           );
           console.log("Response:", response);
           if (response.ok) {
@@ -77,7 +77,7 @@ function Evaluation() {
       const fetchPointsEvaluer = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5001/api/dashboard/pointsEvaluer/${selectedActivite.id}`
+            `/api/dashboard/pointsEvaluer/${selectedActivite.id}`
           );
           if (response.ok) {
             const data = await response.json();

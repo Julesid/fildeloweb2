@@ -19,9 +19,9 @@ const LoginForm = () => {
       try {
         const [responsePromotion, responseEpreuve, responseUtilisateur] =
           await Promise.all([
-            axios.get("http://localhost:5001/api/auth/promotion"),
-            axios.get("http://localhost:5001/api/auth/epreuve"),
-            axios.get("http://localhost:5001/api/auth/utilisateur"),
+            axios.get("/api/auth/promotion"),
+            axios.get("/api/auth/epreuve"),
+            axios.get("/api/auth/utilisateur"),
           ]);
 
         setPromotions(responsePromotion.data);
@@ -40,7 +40,7 @@ const LoginForm = () => {
       const fetchPromotionsByUser = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:5001/api/auth/promotion/${selectedUtilisateur}`
+            `/api/auth/promotion/${selectedUtilisateur}`
           );
           setPromotions(response.data);
         } catch (error) {
@@ -64,7 +64,7 @@ const LoginForm = () => {
     try {
       // Envoie une requête POST pour la connexion
       const response = await axios.post(
-        "http://localhost:5001/api/auth/login",
+        "/api/auth/login",
         {
           username: selectedUtilisateur,
           password,

@@ -224,7 +224,7 @@ function Dashboard() {
 
                 try {
                   const response = await axios.put(
-                    "http://localhost:5001/api/dashboard/password",
+                    "/api/dashboard/password",
                     {
                       oldPassword,
                       newPassword,

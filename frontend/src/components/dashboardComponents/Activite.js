@@ -14,7 +14,7 @@ function Activite() {
     const fetchActivites = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5001/api/dashboard/activite"
+          "/api/dashboard/activite"
         );
         if (response.ok) {
           const data = await response.json();
@@ -41,7 +41,7 @@ function Activite() {
   const handleDelete = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5001/api/dashboard/activite/${id}`,
+        `/api/dashboard/activite/${id}`,
         { method: "DELETE" }
       );
 
@@ -64,7 +64,7 @@ function Activite() {
     e.preventDefault();
     try {
       const response = await fetch(
-        "http://localhost:5001/api/dashboard/activitepost",
+        "/api/dashboard/activitepost",
         {
           method: "post",
           headers: {
@@ -93,7 +93,7 @@ function Activite() {
   const handleSaveEdit = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5001/api/dashboard/activite/${editActivite.id}`,
+        `/api/dashboard/activite/${editActivite.id}`,
         {
           method: "PUT",
           headers: {

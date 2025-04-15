@@ -70,9 +70,7 @@ sequelize
 // --- Routes de l'API ---
 
 // Route de base pour vérifier le fonctionnement de l'API
-app.get("/", (req, res) => {
-  res.send("Bienvenue sur l'API du backend !");
-});
+
 
 // Routes d'authentification
 const authRoutes = require("./routes/auth");
@@ -81,6 +79,14 @@ app.use("/api/auth", authRoutes);
 // Routes du dashboard
 const dashboardRoutes = require("./routes/dashboard");
 app.use("/api/dashboard", dashboardRoutes);
+
+const path = require("path");
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+}
+);
 
 // --- Lancement du serveur ---
 

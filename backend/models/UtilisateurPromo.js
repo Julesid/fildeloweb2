@@ -5,7 +5,7 @@ const sequelize = require('../config/database');
 const Promotion = require('./Promotion'); // Assure-toi que le modèle est importé
 //const Utilisateur = require('./Utilisateur');
 
-const UtilisateurPromo = sequelize.define('UtilisateurPromotion', {
+const UtilisateurPromo = sequelize.define('UtilisateurPromotions', {
   utilisateur_id: {
     type: DataTypes.INTEGER,
     allowNull: false,

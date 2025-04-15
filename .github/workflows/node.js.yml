@@ -35,8 +35,10 @@ jobs:
 
       - name: Build de l'image Docker
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:latest .
-
+            repo_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+            docker build -t ghcr.io/$repo_name:latest .
+        
       - name: Push vers ghcr.io
         run: |
-          docker push ghcr.io/${{ github.repository }}:latest
+            repo_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+            docker push ghcr.io/$repo_name:latest

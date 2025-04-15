@@ -1,10 +1,11 @@
 // config.js
+require('dotenv').config();
+
 module.exports = {
-    DB_NAME: '202425_fildelo_jcheminat2',
-    DB_USER: 'jcheminat',
-    DB_PASSWORD: 'ju11*%CH38',
-    DB_HOST: '127.0.0.1',
-    DB_PORT: 3307, 
-    DB_DIALECT: 'mysql',
-  };
-  
+    DB_NAME: process.env.DB_NAME || 'default_db_name',
+    DB_USER: process.env.DB_USER || 'default_user',
+    DB_PASSWORD: process.env.DB_PASSWORD || 'default_password',
+    DB_HOST: process.env.DB_HOST || 'localhost',
+    DB_PORT: process.env.DB_PORT || 3306,
+    DB_DIALECT: process.env.DB_DIALECT || 'mysql',
+};

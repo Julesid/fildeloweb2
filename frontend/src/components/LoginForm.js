@@ -159,10 +159,7 @@ const LoginForm = () => {
           <div className="absolute right-2 top-2 group cursor-pointer">
             <span className="text-lg text-gray-500">?</span>
             <div className="absolute top-6 right-0 hidden group-hover:flex flex-col items-center text-xs text-gray-500 transform rotate-180">
-              <span>T</span>
-              <span>O</span>
-              <span>T</span>
-              <span>O</span>
+              <span>TOTO</span>
             </div>
           </div>
         </div>

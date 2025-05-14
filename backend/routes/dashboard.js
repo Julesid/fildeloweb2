@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Cookies = require("cookies");
 const sequelize = require("../config/database");
-const { QueryTypes } = require('sequelize');
+const { QueryTypes } = require("sequelize");
 const Activite = require("../models/Activite");
 const PointEvaluer = require("../models/PointEvaluer.js");
 const Utilisateur = require("../models/Utilisateur");
@@ -211,13 +211,80 @@ router.get("/pointsEvaluer/:idActivite", async (req, res) => {
       return res.json(points);
     }
 
-    res.status(404).json({ message: "Aucun point trouvé pour cette activité." });
+    res
+      .status(404)
+      .json({ message: "Aucun point trouvé pour cette activité." });
   } catch (error) {
     console.error("Erreur lors de la récupération des points évalués :", error);
     res.status(500).json({ error: "Erreur serveur." });
   }
 });
 
+// Obtenir les points d'une activité
+router.get("/points/:idActivite", async (req, res) => {
+  const { idActivite } = req.params;
+  try {
+    const points = await sequelize.query(
+      "SELECT * FROM Point_evaluers WHERE id_activite = ?",
+      {
+        replacements: [idActivite],
+        type: QueryTypes.SELECT,
+      }
+    );
+    res.json(points);
+  } catch (err) {
+    res.status(500).json({ error: "Erreur récupération points" });
+  }
+});
+
+// Créer un point
+router.post("/points", async (req, res) => {
+  const { id_activite, libelle, id_critere, created_by } = req.body;
+  try {
+    await sequelize.query(
+      `INSERT INTO Point_evaluers (id_activite, libelle, id_critere, created_by) VALUES (?, ?, ?, ?)`,
+      {
+        replacements: [id_activite, libelle, id_critere, created_by],
+        type: QueryTypes.INSERT,
+      }
+    );
+    res.status(201).json({ message: "Point créé" });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur création point" });
+  }
+});
+
+// Modifier un point
+router.put("/points/:id", async (req, res) => {
+  const { id } = req.params;
+  const { libelle } = req.body;
+  try {
+    await sequelize.query(
+      `UPDATE Point_evaluers SET libelle = ? WHERE id = ?`,
+      {
+        replacements: [libelle, id],
+        type: QueryTypes.UPDATE,
+      }
+    );
+    res.json({ message: "Point modifié" });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur modification point" });
+  }
+});
+
+// Supprimer un point
+router.delete("/points/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await sequelize.query(`DELETE FROM Point_evaluers WHERE id = ?`, {
+      replacements: [id],
+      type: QueryTypes.DELETE,
+    });
+    res.json({ message: "Point supprimé" });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur suppression point" });
+  }
+});
 
 router.get("/etudiantsFromPromo/:id", async (req, res) => {
   try {
@@ -240,36 +307,40 @@ router.get("/etudiantsFromPromo/:id", async (req, res) => {
 });
 
 // Route : Ajout d'une nouvelle activité
-router.post("/activitepost/notation/:idetudiant/:idpointdeval/:note", async (req, res) => {
-  try {
-    const cookies = new Cookies(req, res);
-    const username = cookies.get("usernameId");
+router.post(
+  "/activitepost/notation/:idetudiant/:idpointdeval/:note",
+  async (req, res) => {
+    try {
+      const cookies = new Cookies(req, res);
+      const username = cookies.get("usernameId");
 
-    if (!username) {
-      console.log("Utilisateur non authentifié : cookie absent.");
-      return res.status(401).json({ error: "Utilisateur non authentifié." });
+      if (!username) {
+        console.log("Utilisateur non authentifié : cookie absent.");
+        return res.status(401).json({ error: "Utilisateur non authentifié." });
+      }
+
+      const { libelle, commentaire } = req.body;
+
+      if (!libelle) {
+        return res
+          .status(400)
+          .json({ error: "Le champ 'libelle' est requis." });
+      }
+
+      const newActivite = await Activite.create({
+        libelle,
+        commentaire,
+        created_by: username,
+      });
+
+      console.log("Nouvelle activité ajoutée :", newActivite);
+      res.status(201).json(newActivite);
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de l'activité :", error);
+      res.status(500).json({ error: "Erreur lors de l'ajout de l'activité." });
     }
-
-    const { libelle, commentaire } = req.body;
-
-    if (!libelle) {
-      return res.status(400).json({ error: "Le champ 'libelle' est requis." });
-    }
-
-    const newActivite = await Activite.create({
-      libelle,
-      commentaire,
-      created_by: username,
-    });
-
-    console.log("Nouvelle activité ajoutée :", newActivite);
-    res.status(201).json(newActivite);
-  } catch (error) {
-    console.error("Erreur lors de l'ajout de l'activité :", error);
-    res.status(500).json({ error: "Erreur lors de l'ajout de l'activité." });
   }
-});
-
+);
 
 // Fonction utilitaire pour les activités par défaut
 function getDefaultActivites() {
